@@ -1,13 +1,28 @@
 import React, {Component} from 'react';
 import { reduxForm } from 'redux-form';
-import * as actions from '../../actions';
+// import * as actions from '../../actions';
+import {signinUser} from '../../actions';
+import {connect} from 'react-redux';
+
 
 class Signin extends Component {
 
     handleFormSubmit() {
         console.log(this.email.value, this.password.value)
         //need to do something to log user in
-        this.props.signinUser({email: this.email.value, password: this.password.value})
+        return this.props.dispatch(signinUser({email: this.email.value, password: this.password.value}));
+    }
+
+    renderAlert() {
+        if (this.props.errorMessage) {
+            console.log('AAAAAAAA')
+            return (
+                <div className="alert alert-danger">
+                    <strong>Opps!</strong> {this.props.errorMessage}
+                </div>
+            )
+        }
+        
     }
 
     render() {
@@ -23,11 +38,18 @@ class Signin extends Component {
 
             <fieldset className="form-group">
                 <label>Password:</label>
-                <input ref={password => this.password=password} className="form-control" />
+                <input ref={password => this.password=password} type="password" className="form-control" />
             </fieldset>
+            {this.renderAlert()}
             <button action="submit" className="btn btn-primary">Sign in</button>
         </form>
     );
+    }
+}
+
+const mapStateToProps = (state) => {
+    return {
+        errorMessage: state.auth.error
     }
 }
 
@@ -36,4 +58,4 @@ class Signin extends Component {
 //reduxForm provide its own reducer in our application
 export default reduxForm({
     form: 'signin'
-}, null, actions)(Signin)
+})(connect(mapStateToProps)(Signin))
