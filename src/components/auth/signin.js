@@ -28,7 +28,7 @@ class Signin extends Component {
     render() {
         //handleSubmit comes from reduxForm
         const { handleSubmit } = this.props;
-
+       
     return (
     <form onSubmit={handleSubmit(this.handleFormSubmit.bind(this))}>
             <fieldset className="form-group">
