@@ -1,7 +1,12 @@
 import React, {Component} from 'react';
-import {reduxForm} from 'redux-form';
+import {reduxForm, Field} from 'redux-form';
 import * as actions from '../../actions';
 import {connect} from 'react-redux';
+import renderField from './renderfield';
+import {required, nonEmpty, matches, length, isTrimmed} from './validators';
+const passwordLength = length({min: 10, max: 72});
+const matchesPassword = matches('password');
+
 
 class Signup extends Component {
     handleFormSubmit() {
@@ -16,29 +21,38 @@ class Signup extends Component {
         </div>
         }
     }
+    
+    
 
     render() {
-        const {handleSubmit, fields: {email, password, passwordConfirm}} = this.props;
+        const {handleSubmit} = this.props;
+        
         return (
             <form onSubmit={handleSubmit(this.handleFormSubmit.bind(this))}>
-                <fieldset className="form-group">
-                    <label>Email:</label>
-                    <input className="form-control" type="text" {...email}  ref={email => this.email=email} />
-                    {/* {email.touched && email.error && <div className="error">{email.error}</div>} */}
-                </fieldset>
-                <fieldset className="form-group">
-                    <label>Password:</label>
-                    <input className="form-control"  type="password" {...password} ref={password => this.password=password} />
-                    {/* when there is error, it will be assigned to error property of idividual field object */}
-                    {/* //if the user click into the field and click out and that field has an error
-                    //then return a div with the content password.error */}
-                    {/* {password.touched && password.error && <div className="error">{password.error}</div>} */}
-                </fieldset>
-                <fieldset className="form-group">
-                    <label>Confirm Password</label>
-                    <input className="form-control" {...passwordConfirm} ref={passwordConfirm => this.passwordConfirm=passwordConfirm} type="password" />
-                    {/* {passwordConfirm.touched && passwordConfirm.error && <div className="error">{passwordConfirm.error}</div>} */}
-                </fieldset>
+                <Field
+                    name="email"
+                    type="text"
+                    component={renderField}
+                    label="Email:"
+                    validate={[required, nonEmpty, isTrimmed]}
+                />
+
+                <Field
+                    name="password"
+                    type="password"
+                    component={renderField}
+                    label="Password:"
+                    validate={[required, passwordLength, isTrimmed]}
+                />
+                
+                <Field
+                    name="passwordConfirm"
+                    type="password"
+                    component={renderField}
+                    label="Confirm Password:"
+                    // we can access to the error returned by validator function via meta property in the renderField component
+                    validate={[required, nonEmpty, matchesPassword]}
+                />
                 {this.renderAlert()}
                 <button action="submit" className="btn btn-primary">Sign up</button>
             </form>
@@ -49,29 +63,7 @@ class Signup extends Component {
 
 //whenever the user try to make changes or submit the form, the validate function
 //will be called with all the properties of the form (field names and values of the fields)
-function validate(formProps) {
-    const errors = {};
-    console.log(formProps);
-    if(!formProps.email) {
-        errors.email = 'Please enter an email';
-    }
 
-    if(!formProps.password) {
-        errors.password = 'Please enter an password';
-    }
-
-    if(!formProps.passwordConfirm) {
-        errors.passwordConfirm = 'Please enter an passwordConfirm';
-    }
-
-
-    if (formProps.password !== formProps.passwordConfirm) {
-        errors.password = 'Passwords must match!'
-    }
-    
-
-     return errors;
-}
 
 const mapStateToProps = state => {
     return {
@@ -82,6 +74,6 @@ const mapStateToProps = state => {
 
 export default reduxForm({
     form: 'signup',
-    validate,
-    fields: ['email', 'password', 'passwordConfirm']
+    
+   
 })(connect(mapStateToProps, actions)(Signup));
